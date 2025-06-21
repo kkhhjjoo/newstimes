@@ -10,10 +10,27 @@ menus.forEach((menu) =>
 );
 
 const getNews = async () => {
-  const response = await fetch(url);
-  const data = await response.json();
-  newsList = data.articles;
-  render();
+  try {
+    const response = await fetch(url);
+    console.log('response', response);
+
+    const data = await response.json();
+    if (response.status === 200) {
+      if (data.articles.length === 0) {
+        throw new Error('No result for this search');
+      }
+      newsList = data.articles;
+      render();
+    } else {
+      throw new Error(data.message);
+    }
+
+    newsList = data.articles;
+    render();
+  } catch (error) {
+    console.log('error', error.message);
+    errorRender(error.message);
+  }
 };
 
 const getLatestNews = async () => {
@@ -62,6 +79,13 @@ const render = () => {
     .join('');
   document.getElementById('news-board').innerHTML = newsHTML;
 };
+
+const errorRender = (errorMessage) => {
+  const errorHTML = `<div class="alert alert-danger" role="alert">${errorMessage}</div>`;
+
+  document.getElementById('news-board').innerHTML = errorHTML;
+};
+
 getLatestNews();
 //1. 버튼들에 클릭 이벤트 주기
 //2. 카테고리별 뉴스 가져오기
